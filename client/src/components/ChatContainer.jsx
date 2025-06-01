@@ -25,7 +25,7 @@ function ChatContainer() {
     }
 
     subscribeToMessages();
-    
+
     // Log pour déboguer
     console.log("ChatContainer monté avec selectedUser:", selectedUser);
     console.log("typingUsers initial:", typingUsers);
@@ -40,7 +40,7 @@ function ChatContainer() {
     if (messageEndRef && messages)
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-  
+
   // Effet pour surveiller les changements dans typingUsers
   useEffect(() => {
     console.log("typingUsers a changé:", typingUsers);
@@ -53,7 +53,7 @@ function ChatContainer() {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
         <ChatHeader />
-        <MessageSkeleton />
+        {/* <MessageSkeleton /> */}
         <MessageInput />
       </div>
     );
@@ -67,9 +67,8 @@ function ChatContainer() {
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`chat ${
-              message.senderId === authUser._id ? "chat-end" : "chat-start"
-            }`}
+            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"
+              }`}
           >
             <div className=" chat-image avatar">
               <div className="size-10 rounded-full border">
