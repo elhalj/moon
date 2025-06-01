@@ -10,15 +10,15 @@ export const useChatStore = create((set, get) => ({
   isUserLoading: false,
   isMessageLoading: false,
   typingUsers: {}, // { userId: boolean }
-  
+
   // Fonction utilitaire pour mettre à jour typingUsers
   updateTypingStatus: (userId, isTyping) => {
     console.log(`Mise à jour du statut de typing pour ${userId}: ${isTyping}`);
-    set(state => ({
+    set((state) => ({
       typingUsers: {
         ...state.typingUsers,
-        [userId]: isTyping
-      }
+        [userId]: isTyping,
+      },
     }));
     console.log("Nouveau typingUsers:", get().typingUsers);
   },
@@ -104,8 +104,12 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser } = get();
     if (!selectedUser) return;
 
-    console.log(`Envoi de l'événement ${isTyping ? "typing" : "stopTyping"} pour ${selectedUser._id}`);
-    
+    console.log(
+      `Envoi de l'événement ${isTyping ? "typing" : "stopTyping"} pour ${
+        selectedUser._id
+      }`
+    );
+
     // Émettre l'événement via socket.io pour une réponse immédiate
     const socket = useAuthStore.getState().socket;
     if (socket) {
@@ -113,7 +117,7 @@ export const useChatStore = create((set, get) => ({
     } else {
       console.error("Socket non disponible pour envoyer l'événement de typing");
     }
-    
+
     // Appeler également l'API REST pour assurer la persistance
     try {
       axiosInstance.post(`/message/typing/${selectedUser._id}`, { isTyping });
@@ -124,9 +128,9 @@ export const useChatStore = create((set, get) => ({
 
   setSelectedUser: (selectedUser) => {
     // Réinitialiser typingUsers lors du changement d'utilisateur
-    set({ 
+    set({
       selectedUser,
-      typingUsers: {}
+      typingUsers: {},
     });
   },
 }));
