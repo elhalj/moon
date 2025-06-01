@@ -10,6 +10,18 @@ export const useChatStore = create((set, get) => ({
   isUserLoading: false,
   isMessageLoading: false,
   typingUsers: {}, // { userId: boolean }
+  
+  // Fonction utilitaire pour mettre à jour typingUsers
+  updateTypingStatus: (userId, isTyping) => {
+    console.log(`Mise à jour du statut de typing pour ${userId}: ${isTyping}`);
+    set(state => ({
+      typingUsers: {
+        ...state.typingUsers,
+        [userId]: isTyping
+      }
+    }));
+    console.log("Nouveau typingUsers:", get().typingUsers);
+  },
 
   getUser: async () => {
     set({ isUserLoading: true });
@@ -66,16 +78,18 @@ export const useChatStore = create((set, get) => ({
 
     // Écouter l'événement userTyping
     socket.on("userTyping", ({ userId }) => {
-      set({
-        typingUsers: { ...get().typingUsers, [userId]: true },
-      });
+      console.log(`Événement userTyping reçu de ${userId}`);
+      console.log("Avant mise à jour, typingUsers:", get().typingUsers);
+      // Utiliser la fonction utilitaire pour mettre à jour le statut
+      get().updateTypingStatus(userId, true);
     });
 
     // Écouter l'événement userStopTyping
     socket.on("userStopTyping", ({ userId }) => {
-      set({
-        typingUsers: { ...get().typingUsers, [userId]: false },
-      });
+      console.log(`Événement userStopTyping reçu de ${userId}`);
+      console.log("Avant mise à jour, typingUsers:", get().typingUsers);
+      // Utiliser la fonction utilitaire pour mettre à jour le statut
+      get().updateTypingStatus(userId, false);
     });
   },
 
@@ -90,10 +104,14 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser } = get();
     if (!selectedUser) return;
 
+    console.log(`Envoi de l'événement ${isTyping ? "typing" : "stopTyping"} pour ${selectedUser._id}`);
+    
     // Émettre l'événement via socket.io pour une réponse immédiate
     const socket = useAuthStore.getState().socket;
     if (socket) {
       socket.emit(isTyping ? "typing" : "stopTyping", selectedUser._id);
+    } else {
+      console.error("Socket non disponible pour envoyer l'événement de typing");
     }
     
     // Appeler également l'API REST pour assurer la persistance
@@ -104,5 +122,11 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => {
+    // Réinitialiser typingUsers lors du changement d'utilisateur
+    set({ 
+      selectedUser,
+      typingUsers: {}
+    });
+  },
 }));

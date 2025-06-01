@@ -25,14 +25,29 @@ function ChatContainer() {
     }
 
     subscribeToMessages();
+    
+    // Log pour déboguer
+    console.log("ChatContainer monté avec selectedUser:", selectedUser);
+    console.log("typingUsers initial:", typingUsers);
 
-    return () => unSubscribeFromMessages();
-  }, [selectedUser, getMessages, subscribeToMessages, unSubscribeFromMessages]);
+    return () => {
+      unSubscribeFromMessages();
+      console.log("ChatContainer démonté");
+    };
+  }, [selectedUser, getMessages, subscribeToMessages, unSubscribeFromMessages, typingUsers]);
 
   useEffect(() => {
     if (messageEndRef && messages)
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  
+  // Effet pour surveiller les changements dans typingUsers
+  useEffect(() => {
+    console.log("typingUsers a changé:", typingUsers);
+    if (selectedUser) {
+      console.log(`L'utilisateur ${selectedUser._id} est-il en train d'écrire? ${typingUsers[selectedUser._id] ? 'Oui' : 'Non'}`);
+    }
+  }, [typingUsers, selectedUser]);
 
   if (isMessageLoading) {
     return (
@@ -85,7 +100,13 @@ function ChatContainer() {
             </div>
           </div>
         ))}
-        {selectedUser && typingUsers[selectedUser._id] && (
+        {/* Log de débogage pour l'indicateur de typing */}
+        {console.log("Rendu - Condition d'affichage:", {
+          selectedUser: selectedUser ? selectedUser._id : 'aucun',
+          typingUsers: typingUsers,
+          isTyping: selectedUser && typingUsers ? !!typingUsers[selectedUser._id] : false
+        })}
+        {selectedUser && typingUsers && typingUsers[selectedUser._id] === true && (
           <div className="chat chat-start">
             <div className="chat-image avatar">
               <div className="size-10 rounded-full border">

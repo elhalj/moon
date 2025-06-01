@@ -56,21 +56,33 @@ const MessageInput = () => {
     const newText = e.target.value;
     setText(newText);
     
+    console.log("handleTextChange appelé avec texte:", newText);
+    
     // Si l'utilisateur commence à écrire, émettre l'événement typing
     if (newText.length > 0) {
+      console.log("Déclenchement de l'événement typing (true)");
+      
+      // Appeler handleTyping avec un petit délai pour éviter les appels trop fréquents
+      // Réinitialiser le timeout précédent
+      if (typingTimeout) {
+        console.log("Réinitialisation du timeout précédent");
+        clearTimeout(typingTimeout);
+      }
+      
+      // Émettre l'événement typing immédiatement
       handleTyping(true);
       
-      // Réinitialiser le timeout précédent
-      if (typingTimeout) clearTimeout(typingTimeout);
-      
       // Définir un nouveau timeout pour arrêter l'événement typing après 2 secondes d'inactivité
+      console.log("Configuration d'un nouveau timeout de 2 secondes");
       const newTimeout = setTimeout(() => {
+        console.log("Timeout expiré, arrêt de l'événement typing");
         handleTyping(false);
       }, 2000);
       
       setTypingTimeout(newTimeout);
     } else {
       // Si le texte est vide, arrêter l'événement typing immédiatement
+      console.log("Texte vide, arrêt immédiat de l'événement typing");
       handleTyping(false);
       if (typingTimeout) clearTimeout(typingTimeout);
     }
@@ -78,7 +90,9 @@ const MessageInput = () => {
   
   // Nettoyer le timeout quand le composant est démonté
   useEffect(() => {
+    console.log("MessageInput monté");
     return () => {
+      console.log("MessageInput démonté, nettoyage des ressources");
       if (typingTimeout) clearTimeout(typingTimeout);
       handleTyping(false);
     };

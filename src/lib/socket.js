@@ -30,16 +30,24 @@ io.on("connection", (socket) => {
 
     // Gestion des événements de typing
     socket.on("typing", (receiverId) => {
+        console.log(`Événement typing reçu de ${userId} pour ${receiverId}`);
         const receiverSocketId = userSocketMap[receiverId];
         if (receiverSocketId) {
+            console.log(`Émission de userTyping vers ${receiverId} (socket: ${receiverSocketId})`);
             io.to(receiverSocketId).emit("userTyping", { userId });
+        } else {
+            console.log(`Impossible de trouver le socket pour le destinataire ${receiverId}`);
         }
     });
 
     socket.on("stopTyping", (receiverId) => {
+        console.log(`Événement stopTyping reçu de ${userId} pour ${receiverId}`);
         const receiverSocketId = userSocketMap[receiverId];
         if (receiverSocketId) {
+            console.log(`Émission de userStopTyping vers ${receiverId} (socket: ${receiverSocketId})`);
             io.to(receiverSocketId).emit("userStopTyping", { userId });
+        } else {
+            console.log(`Impossible de trouver le socket pour le destinataire ${receiverId}`);
         }
     });
 
