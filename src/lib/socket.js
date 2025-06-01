@@ -28,11 +28,26 @@ io.on("connection", (socket) => {
     // io.emit is used to send is use to send event to all the connect client
     io.emit("getOnlineUsers",Object.keys(userSocketMap));
 
+    // Gestion des événements de typing
+    socket.on("typing", (receiverId) => {
+        const receiverSocketId = userSocketMap[receiverId];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("userTyping", { userId });
+        }
+    });
+
+    socket.on("stopTyping", (receiverId) => {
+        const receiverSocketId = userSocketMap[receiverId];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("userStopTyping", { userId });
+        }
+    });
+
     socket.on("disconnect", () => {
         console.log("A user disconnected", socket.id);
         delete userSocketMap[userId];
         io.emit("getOnlineUsers",Object.keys(userSocketMap));
-    })
-})
+    });
+});
 
 export { io, server, app };

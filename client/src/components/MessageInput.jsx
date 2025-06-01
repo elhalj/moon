@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -6,8 +6,9 @@ import toast from "react-hot-toast";
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [typingTimeout, setTypingTimeout] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const { sendMessage, handleTyping } = useChatStore();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -42,10 +43,46 @@ const MessageInput = () => {
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      
+      // Indiquer que l'utilisateur a arrêté d'écrire après l'envoi du message
+      handleTyping(false);
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
+  
+  // Gérer l'événement de typing
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setText(newText);
+    
+    // Si l'utilisateur commence à écrire, émettre l'événement typing
+    if (newText.length > 0) {
+      handleTyping(true);
+      
+      // Réinitialiser le timeout précédent
+      if (typingTimeout) clearTimeout(typingTimeout);
+      
+      // Définir un nouveau timeout pour arrêter l'événement typing après 2 secondes d'inactivité
+      const newTimeout = setTimeout(() => {
+        handleTyping(false);
+      }, 2000);
+      
+      setTypingTimeout(newTimeout);
+    } else {
+      // Si le texte est vide, arrêter l'événement typing immédiatement
+      handleTyping(false);
+      if (typingTimeout) clearTimeout(typingTimeout);
+    }
+  };
+  
+  // Nettoyer le timeout quand le composant est démonté
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) clearTimeout(typingTimeout);
+      handleTyping(false);
+    };
+  }, [typingTimeout, handleTyping]);
 
   return (
     <div className="p-4 w-full">
@@ -76,7 +113,7 @@ const MessageInput = () => {
             className="w-full input input-bordered rounded-lg input-sm sm:input-md"
             placeholder="Type a message..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
           />
           <input
             type="file"

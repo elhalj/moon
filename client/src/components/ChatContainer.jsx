@@ -15,6 +15,7 @@ function ChatContainer() {
     isMessageLoading,
     subscribeToMessages,
     unSubscribeFromMessages,
+    typingUsers,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -84,6 +85,26 @@ function ChatContainer() {
             </div>
           </div>
         ))}
+        {selectedUser && typingUsers[selectedUser._id] && (
+          <div className="chat chat-start">
+            <div className="chat-image avatar">
+              <div className="size-10 rounded-full border">
+                <img
+                  src={selectedUser.profilePic || arriere}
+                  alt="profile pic"
+                />
+              </div>
+            </div>
+            <div className="chat-bubble bg-gray-700 flex items-center gap-2">
+              <span className="typing-indicator">
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+              </span>
+              <span>est en train d'écrire...</span>
+            </div>
+          </div>
+        )}
         <div ref={messageEndRef} ></div>
       </div>
 
